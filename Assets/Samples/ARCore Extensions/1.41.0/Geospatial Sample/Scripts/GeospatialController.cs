@@ -55,14 +55,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         Justification = "Bypass source check.")]
     public class GeospatialController : MonoBehaviour
     {
-        [Header("DataBase connection")]
-        // add by PPG
-        /// <summary>
-        /// Connection to DataManager.
-        /// </summary>
-        [SerializeField] private DataManager dataManager;
-
-
         [Header("AR Components")]
 
 #if ARCORE_USE_ARF_5 // use ARF 5
@@ -574,7 +566,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 
         public void GetAllAnchorsFromDataBase()
         {
-            //dataManager.RequestPlacesDataFromServer();
+            // DataManager.Instance.RequestPlacesDataFromServer();
 
             //GameObject gltfObject = new GameObject();
             //var gltf = gltfObject.AddComponent<GLTFast.GltfAsset>();
@@ -1177,18 +1169,15 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         }
 
         // added by PPG
-        public ARGeospatialAnchor PlaceFixedGeospatialAnchor(GeospatialAnchorHistory history, GameObject go)
+        public void PlaceFixedGeospatialAnchor(GeospatialAnchorHistory history, GameObject go)
         {
             bool terrain = history.AnchorType == AnchorType.Terrain;
-            Quaternion eunRotation = CreateRotation(history);
-            ARGeospatialAnchor anchor = null;
-
-            anchor = AnchorManager.AddAnchor(
-                history.Latitude, history.Longitude, history.Altitude, eunRotation);
+            
+            ARGeospatialAnchor anchor = AnchorManager.AddAnchor(history.Latitude, history.Longitude, history.Altitude, history.EunRotation);
  
             if (anchor != null)
             {
-                GameObject anchorGO = Instantiate(GeospatialPrefab, anchor.transform);
+                GameObject anchorGO = Instantiate(go, anchor.transform);
                 anchor.gameObject.SetActive(!terrain);
                 anchorGO.transform.parent = anchor.gameObject.transform;
                 _anchorObjects.Add(anchor.gameObject);
@@ -1198,8 +1187,6 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             {
                 SnackBarText.text = GetDisplayStringForAnchorPlacedFailure();
             }
-
-            return anchor;
         }
 
 

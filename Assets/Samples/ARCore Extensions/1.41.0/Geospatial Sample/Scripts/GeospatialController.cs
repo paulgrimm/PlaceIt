@@ -22,7 +22,7 @@
 // symbol, see https://docs.unity3d.com/Manual/CustomScriptingSymbols.html
 // You can define ARCORE_USE_ARF_5 for Unity 2021.x or higher but you have
 // to define it after 2022.x
-#warning For AR Foundation 5.X compatibility, define the ARCORE_USE_ARF_5 symbol
+//#warning For AR Foundation 5.X compatibility, define the ARCORE_USE_ARF_5 symbol
 #endif
 
 #define ARCORE_USE_ARF_5
@@ -55,6 +55,14 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         Justification = "Bypass source check.")]
     public class GeospatialController : MonoBehaviour
     {
+        [Header("DataBase connection")]
+        // add by PPG
+        /// <summary>
+        /// Connection to DataManager.
+        /// </summary>
+        public GameObject DataManager;
+
+
         [Header("AR Components")]
 
 #if ARCORE_USE_ARF_5 // use ARF 5
@@ -319,6 +327,8 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         private bool _isInARView = false;
         private bool _isReturning = false;
         private bool _isLocalizing = false;
+        // added by PPG
+        private bool _firstTime = true;
         private bool _enablingGeospatial = false;
         private bool _shouldResolvingHistory = false;
         private float _localizationPassedTime = 0f;
@@ -562,6 +572,30 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
             }
         }
 
+        public void GetAllAnchorsFromDataBase()
+        {
+
+            //DataManager.RequestPlacesDataFromServer();
+
+            //GameObject gltfObject = new GameObject();
+            //var gltf = gltfObject.AddComponent<GLTFast.GltfAsset>();
+            //gltf.Url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
+
+            //ARGeospatialAnchor anchor = AnchorManager.ResolveAnchorOnTerrain(49.75282738062965, 8.635935768419147, 180.0, Quaternion.identity);
+            PlaceFixedGeospatialAnchor(new GeospatialAnchorHistory(DateTime.Now, 49.75282738062965, 8.635935768419147, 0.0, AnchorType.Terrain, Quaternion.identity), GameObject.CreatePrimitive(PrimitiveType.Cube));
+            // Kruse new GeospatialAnchorHistory(49.75015629293127, 8.6341706556505, 0, Quaternion.identity);
+            // Bahnhof <coordinates>8.633485259289193,49.75634695080406,123.6844939472756</coordinates>
+            // Kuchenpfad <coordinates>8.636318320591327,49.75277830798341,131.2826223464064</coordinates>
+            // Dieburg Notstrom <coordinates>8.857782913934592,49.90187351996843,145.1327125127027</coordinates>
+
+            PlaceFixedGeospatialAnchor(new GeospatialAnchorHistory(DateTime.Now, 49.75282738062965, 8.635935768419147, 0, AnchorType.Terrain, Quaternion.identity), GameObject.CreatePrimitive(PrimitiveType.Cube)); // Garten
+            PlaceFixedGeospatialAnchor(new GeospatialAnchorHistory(DateTime.Now, 49.75015629293127, 8.6341706556505, 0, AnchorType.Terrain, Quaternion.identity), GameObject.CreatePrimitive(PrimitiveType.Cube)); // Kruse Straße
+            PlaceFixedGeospatialAnchor(new GeospatialAnchorHistory(DateTime.Now, 49.75282738062965, 8.635935768419147, 0, AnchorType.Terrain, Quaternion.identity), GameObject.CreatePrimitive(PrimitiveType.Cube)); // Straße
+            PlaceFixedGeospatialAnchor(new GeospatialAnchorHistory(DateTime.Now, 49.75634695080406, 8.633485259289193, 0, AnchorType.Terrain, Quaternion.identity), GameObject.CreatePrimitive(PrimitiveType.Cube)); // Am Bahnhof
+            PlaceFixedGeospatialAnchor(new GeospatialAnchorHistory(DateTime.Now, 49.90187351996843, 8.857782913934592, 0, AnchorType.Terrain, Quaternion.identity), GameObject.CreatePrimitive(PrimitiveType.Cube)); // Dieburg Notstrom
+            PlaceFixedGeospatialAnchor(new GeospatialAnchorHistory(DateTime.Now, 49.75634695080406, 8.633485259289193, 0, AnchorType.Terrain, Quaternion.identity), GameObject.CreatePrimitive(PrimitiveType.Cube)); // Am Bahnhof    
+        } 
+            
         /// <summary>
         /// Unity's Update() method.
         /// </summary>
@@ -691,6 +725,13 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 AnchorSettingButton.gameObject.SetActive(true);
                 ClearAllButton.gameObject.SetActive(_anchorObjects.Count > 0);
                 SnackBarText.text = _localizationSuccessMessage;
+
+                if (_firstTime)
+				{
+                    _firstTime = false;
+                    GetAllAnchorsFromDataBase();
+				}
+                
                 foreach (var go in _anchorObjects)
                 {
                     go.SetActive(true);
@@ -1135,6 +1176,33 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 
             return anchor;
         }
+
+        // added by PPG
+        public ARGeospatialAnchor PlaceFixedGeospatialAnchor(GeospatialAnchorHistory history, GameObject go)
+        {
+            bool terrain = history.AnchorType == AnchorType.Terrain;
+            Quaternion eunRotation = CreateRotation(history);
+            ARGeospatialAnchor anchor = null;
+
+            anchor = AnchorManager.AddAnchor(
+                history.Latitude, history.Longitude, history.Altitude, eunRotation);
+ 
+            if (anchor != null)
+            {
+                GameObject anchorGO = Instantiate(GeospatialPrefab, anchor.transform);
+                anchor.gameObject.SetActive(!terrain);
+                anchorGO.transform.parent = anchor.gameObject.transform;
+                _anchorObjects.Add(anchor.gameObject);
+                SnackBarText.text = GetDisplayStringForAnchorPlacedSuccess();
+            }
+            else
+            {
+                SnackBarText.text = GetDisplayStringForAnchorPlacedFailure();
+            }
+
+            return anchor;
+        }
+
 
         private ARGeospatialAnchor PlaceGeospatialAnchor(
             GeospatialAnchorHistory history)

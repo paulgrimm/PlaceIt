@@ -60,7 +60,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
         /// <summary>
         /// Connection to DataManager.
         /// </summary>
-        public GameObject DataManager;
+        [SerializeField] private DataManager dataManager;
 
 
         [Header("AR Components")]
@@ -574,8 +574,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 
         public void GetAllAnchorsFromDataBase()
         {
-
-            //DataManager.RequestPlacesDataFromServer();
+            //dataManager.RequestPlacesDataFromServer();
 
             //GameObject gltfObject = new GameObject();
             //var gltf = gltfObject.AddComponent<GLTFast.GltfAsset>();

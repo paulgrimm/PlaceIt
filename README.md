@@ -1,2 +1,0 @@
-# PlaceIt
-PlaceIt

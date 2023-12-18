@@ -9,6 +9,9 @@ using Newtonsoft.Json;
 public enum Group
 {
     All,
+    fuels,
+    Fuchs,
+    Grimm,
     Group1,
     Group2,
     Group3,
@@ -52,7 +55,7 @@ public class RESTApiClient : MonoBehaviour
 
     private string RemoveEmptySpaces(string input)
     {
-        return Regex.Replace(input, @"\s+", string.Empty); // changed by ppg
+        return Regex.Replace(input, @"\s+", string.Empty); 
     }
 
     public void GetPlacesFromServer(Action<List<Place>> callback)

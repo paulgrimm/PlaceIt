@@ -566,7 +566,7 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
 
         public void GetAllAnchorsFromDataBase()
         {
-            // DataManager.Instance.RequestPlacesDataFromServer();
+            DataManager.Instance.RequestPlacesDataFromServer();
 
             //GameObject gltfObject = new GameObject();
             //var gltf = gltfObject.AddComponent<GLTFast.GltfAsset>();
@@ -1224,6 +1224,9 @@ namespace Google.XR.ARCoreExtensions.Samples.Geospatial
                 anchorGO.transform.parent = anchor.gameObject.transform;
                 _anchorObjects.Add(anchor.gameObject);
                 SnackBarText.text = GetDisplayStringForAnchorPlacedSuccess();
+
+                DataManager.Instance.AddPlaceToDataBase( RESTApiClient.Instance.GetGroupname(), history.Longitude, history.Latitude, history.Altitude, eunRotation, "placename", "placeInfo" );
+                //DataManager.Instance.AddPlaceToDataBase(RESTApiClient.Instance.GetGroupname(), history.Longitude, history.Latitude, history.Altitude, eunRotation, "placename", "placeInfo", DataManager.Instance.GetDemoTexture2D(), "http://sample.url/something", "Descriptiontext", null);
             }
             else
             {

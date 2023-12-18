@@ -320,7 +320,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4d13f07cb61de648ab3257db5206f0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _group: 0
+  _group: 3
   baseRemote: http://141.100.233.223:3000
   baseLocal: http://localhost:3000
   useLocalServer: 0
@@ -837,7 +837,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 75a1114bd37d249b08c83cfbaf234679, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dataManager: {fileID: 1749850946}
   Origin: {fileID: 596133977}
   Session: {fileID: 193207847}
   AnchorManager: {fileID: 596133976}
@@ -4271,8 +4270,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   geospatialController: {fileID: 384014291}
-  demoGameObject: {fileID: 0}
-  demoTexture: {fileID: 0}
+  demoGameObject: {fileID: 2921863405709726766, guid: 24bda899bd9474012882b8039b259df5, type: 3}
+  demoTexture: {fileID: 2800000, guid: 540f7bcd4204544f092e302bcbe35a07, type: 3}
   debug: 0
 --- !u!4 &1749850951
 Transform:

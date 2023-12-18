@@ -39,8 +39,6 @@ public class Location
     public int placeId { get; set; }
 }
 
-//public class Group : String {}
-
 public class DataManager : MonoBehaviour
 {
     public static DataManager Instance;

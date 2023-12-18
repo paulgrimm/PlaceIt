@@ -43,7 +43,7 @@ public class Location
 
 public class DataManager : MonoBehaviour
 {
-    public static DataManager instance;
+    public static DataManager Instance;
 
     // needed as reference to the geospatialController to call the function to generate a new anchor
     [SerializeField] private GeospatialController geospatialController;
@@ -54,8 +54,8 @@ public class DataManager : MonoBehaviour
 
     private void Awake()
     {
-        if (instance == null)
-            instance = this;
+        if (Instance == null)
+            Instance = this;
     }
 
 
@@ -74,7 +74,7 @@ public class DataManager : MonoBehaviour
     public void RequestPlacesDataFromServer()
     {
         // Callback to request the Data from the server
-        RESTApiClient.instance.GetPlacesFromServer((placesFromServer) =>
+        RESTApiClient.Instance.GetPlacesFromServer(placesFromServer =>
         {
             if (placesFromServer == null || placesFromServer.Count == 0)
             {
@@ -91,7 +91,7 @@ public class DataManager : MonoBehaviour
 
     private void GeneratePlaces(List<Place> placesFromServer)
     {
-        foreach (var place in placesFromServer)
+        foreach(var place in placesFromServer)
         {
             Debug.Log(place.name);
             //GameObject gltfObject = new GameObject();
@@ -101,14 +101,17 @@ public class DataManager : MonoBehaviour
             //gltf.Url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 
             // convert base64Texture from response to Texture2D
-            byte[] imageData = Convert.FromBase64String(place.base64texture);
-
-            Texture2D texture = new Texture2D(1024, 1024);
-            texture.filterMode = FilterMode.Trilinear;
-            texture.LoadImage(imageData);
-
             var newGo = Instantiate(demoGameObject);
-            newGo.GetComponent<Renderer>().material.SetTexture("_MainTex", texture);
+            
+            if (!place.base64texture.Equals(""))
+            {
+                byte[] imageData = Convert.FromBase64String(place.base64texture);
+
+                Texture2D texture = new Texture2D(1024, 1024);
+                texture.filterMode = FilterMode.Trilinear;
+                texture.LoadImage(imageData);
+                newGo.GetComponent<Renderer>().material.SetTexture("_MainTex", texture);
+            }
 
             foreach (var location in place.locations)
             {
@@ -126,7 +129,7 @@ public class DataManager : MonoBehaviour
                 // CALLS a function from the GeospatialController.cs to generate a new anchor
                 // This function has to be implemented in the GeospatialController.cs
                 // demoGameObject is a placeholder for the gltfObject (must be available in runtime, functionalliy to download the gltf from the server is not implemented yet)
-                geospatialController.PlaceFixedGeospatialAnchor(new GeospatialAnchorHistory(DateTime.Now, location.lat, location.lng, location.lev, AnchorType.Terrain, new Quaternion()), GameObject.CreatePrimitive(PrimitiveType.Cube));
+                geospatialController.PlaceFixedGeospatialAnchor(new GeospatialAnchorHistory(DateTime.Now, location.lat, location.lng, location.lev, AnchorType.Terrain, newQuaternion), newGo);
             }
         }
     }
@@ -134,7 +137,7 @@ public class DataManager : MonoBehaviour
 
     // AddPlace including Texture2D Data that was captured before with your application. Texture2D automatically is converted to a base64String
     // customBase64 is a custom field to submit any kind of data as base64String (conversion has to be done manually)
-    public void AddPlaceToDataBase(string authorName, double lng, double lat, double lev, Quaternion rotation, string placeName,
+    public void AddPlaceToDataBase(Group authorName, double lng, double lat, double lev, Quaternion rotation, string placeName,
         string placeInfo, Texture2D texture, string objectURL = "", string customText = "", string customBase64 = "")
     {
         // settings
@@ -172,12 +175,12 @@ public class DataManager : MonoBehaviour
         var serializedJson = JsonConvert.SerializeObject(newPlace, setting);
         Debug.Log(serializedJson);
 
-        RESTApiClient.instance.UploadSinglePlace(serializedJson);
+        RESTApiClient.Instance.UploadSinglePlace(serializedJson);
     }
 
 
     // authorName must be 'Group1', 'Group2', 'Group3', 'Group4', 'Group5' or 'Group6'
-    public void AddPlaceToDataBase(string authorName, double lng, double lat, double lev, Quaternion rotation, string placeName, string placeInfo = "", string objectURL = "", string customText = "")
+    public void AddPlaceToDataBase(Group authorName, double lng, double lat, double lev, Quaternion rotation, string placeName, string placeInfo = "", string objectURL = "", string customText = "")
     {
         // settings
         var setting = new JsonSerializerSettings();
@@ -210,7 +213,7 @@ public class DataManager : MonoBehaviour
         var serializedJson = JsonConvert.SerializeObject(newPlace, setting);
         Debug.Log(serializedJson);
 
-        RESTApiClient.instance.UploadSinglePlace(serializedJson);
+        RESTApiClient.Instance.UploadSinglePlace(serializedJson);
     }
 
 
@@ -234,7 +237,7 @@ public class DataManager : MonoBehaviour
         setting.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
         var newAutor = new Autor();
-        newAutor.name = "Andreas"; // author fixed to the demo autor 'Andreas'
+        newAutor.name = Group.All.ToString();
         newAutor.rating = 1;
 
         var newLocation = new Location();
@@ -260,6 +263,6 @@ public class DataManager : MonoBehaviour
         var serializedJson = JsonConvert.SerializeObject(newPlace, setting);
         Debug.Log(serializedJson);
 
-        RESTApiClient.instance.UploadSinglePlace(serializedJson);
+        RESTApiClient.Instance.UploadSinglePlace(serializedJson);
     }
 }

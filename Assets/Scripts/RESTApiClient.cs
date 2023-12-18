@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
@@ -18,7 +19,7 @@ public enum Group
 [ExecuteInEditMode]
 public class RESTApiClient : MonoBehaviour
 {
-    public static RESTApiClient instance;
+    public static RESTApiClient Instance;
 
     [Header("Set Groupname")]
     [SerializeField]
@@ -39,8 +40,8 @@ public class RESTApiClient : MonoBehaviour
 
     private void Awake()
     {
-        if (instance == null)
-            instance = this;
+        if (Instance == null)
+            Instance = this;
 
         string baseURL = useLocalServer ? baseLocal : baseRemote;
         baseURL = RemoveEmptySpaces(baseURL);
@@ -53,35 +54,18 @@ public class RESTApiClient : MonoBehaviour
     {
         return Regex.Replace(input, @"\s+", string.Empty); // changed by ppg
     }
-        
 
-    private void Start()
-    {
-#if UNITY_EDITOR
-        if (debug)
-        {
-            TestGettingAllPlacesFromApi();
-        }
-#endif
-    }
-
-    private void TestGettingAllPlacesFromApi()
-    {
-        StartCoroutine(ProcessRequest(_placesRouteURL, (data) =>
-        {
-            Debug.Log(data);
-        }));
-    }
-
-    public void GetPlacesFromServer(System.Action<List<Place>> callback)
+    public void GetPlacesFromServer(Action<List<Place>> callback)
     {
         StartCoroutine(ProcessRequest(_placesRouteURL, callback));
     }
 
-    private IEnumerator ProcessRequest(string uri, System.Action<List<Place>> callback)
+    private IEnumerator ProcessRequest(string uri, Action<List<Place>> callback)
     {
         using (UnityWebRequest request = UnityWebRequest.Get(uri))
         {
+            request.disposeDownloadHandlerOnDispose = true;
+            
             yield return request.SendWebRequest();
 
             // no connection at all
@@ -99,8 +83,16 @@ public class RESTApiClient : MonoBehaviour
                 }
                 else
                 {
-                    var places = JsonConvert.DeserializeObject<List<Place>>(request.downloadHandler.text);
-                    callback(places);
+                    try
+                    {
+                        var places = JsonConvert.DeserializeObject<List<Place>>(request.downloadHandler.text);
+                        callback(places);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.Log(e);
+                        callback(null);
+                    }
                 }
             }
         }
@@ -121,6 +113,8 @@ public class RESTApiClient : MonoBehaviour
 
         using (UnityWebRequest request = UnityWebRequest.Post(uri, form))
         {
+            request.disposeUploadHandlerOnDispose = true;
+            
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.ConnectionError)
